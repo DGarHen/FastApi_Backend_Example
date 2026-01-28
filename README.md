@@ -28,11 +28,13 @@ pip install fastapi[standard]
 ```
 
 ### 2. Running the proyect
+in order to start the proyect please execute 
 ```powershell
-fastapi dev [class]
+fastapi dev app/main.py
 ```
+then the database file, db.sqlite3 should be created at the root.
 
-### note for later:
+### 3. Note for later:
 Para que "la otra persona" sepa exactamente qué versiones instalar, no basta con decirle "instala fastapi". Lo profesional es generar una lista de lo que tienes instalado tú ahora mismo.
 
 Ejecuta este comando en tu terminal (con el `venv` activado) antes de subir tus cambios a Git:
