@@ -1,12 +1,12 @@
 
-from fastapi import HTTPException, status, APIRouter
+from fastapi import HTTPException, Query, status, APIRouter
 from models import *
 from db import *
 from sqlmodel import *
 
 router = APIRouter(tags=['Customers'])
 
-@router.post("/customers", response_model=Customer)
+@router.post("/customers", response_model=Customer, status_code=status.HTTP_201_CREATED)
 async def createCustomer(customerData: CustomerCreate, session: SessionDep):
     customer = Customer.model_validate(customerData.model_dump())
     session.add(customer)
@@ -49,7 +49,8 @@ async def updateCustomer(customerId: int, customerData: CustomerUpdate, session:
     return customerDb
 
 @router.post("/subscribe/{customerId}/plan/{planId}", response_model=CustomerPlan)
-async def subscribeCustomerToPlan(customerId: int, planId: int, session: SessionDep):
+async def subscribeCustomerToPlan(customerId: int, planId: int, session: SessionDep,
+                                  planStatus: StatusEnum = Query()):
     customerDb = session.get(Customer, customerId)
     if not customerDb:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Error, Customer was not found.")
@@ -57,16 +58,17 @@ async def subscribeCustomerToPlan(customerId: int, planId: int, session: Session
     if not planDb:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Error, Plan was not found.")
     
-    customerPlanDb = CustomerPlan(customerId=customerDb.id, planId=planDb.id)
+    customerPlanDb = CustomerPlan(customerId=customerDb.id, planId=planDb.id, status=planStatus)
     session.add(customerPlanDb)
     session.commit()
     session.refresh(customerPlanDb)
     return customerPlanDb
 
-@router.get("/customer/{customerId}/plan", response_model=list[Plan])
-async def getCustomersPlans(session: SessionDep, customerId: int):
+@router.get("/customer/{customerId}/plan/", response_model=list[Plan])
+async def getCustomersPlans(session: SessionDep, customerId: int, statusPlan:StatusEnum = Query()):
     customerDb = session.get(Customer, customerId)
     if not customerDb:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Error, Customer was not found.")
-    
+    query = select(CustomerPlan).where(CustomerPlan.customerId == customerId).where(CustomerPlan.status == statusPlan)
+    queryPlans = session.exec(query).all()
     return customerDb.plans

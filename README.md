@@ -25,6 +25,7 @@ python -m venv venv
 now the terminal should show at the begging of the command line the name of the venv, if so, run the next command to install fast api with all dependencies:
  ```powershell
 pip install fastapi[standard]
+pip install pytest
 ```
 
 ### 2. Running the proyect
@@ -34,15 +35,19 @@ fastapi dev app/main.py
 ```
 then the database file, db.sqlite3 should be created at the root.
 
-### 3. Note for later:
-Para que "la otra persona" sepa exactamente qué versiones instalar, no basta con decirle "instala fastapi". Lo profesional es generar una lista de lo que tienes instalado tú ahora mismo.
-
-Ejecuta este comando en tu terminal (con el `venv` activado) antes de subir tus cambios a Git:
-
+### 3. Running the tests
+in order to run the test cases 
 ```powershell
-pip freeze > requirements.txt
+pytest app/tests.py
 ```
-entonces la persona podra ejecutar: 
+then the database file, db.sqlite3 should be created at the root.
+
+### 0. Use requirements:
+remember you could use the follow command to install all dependencies with the proper version.
 ```powershell
 pip install -r requirements.txt
 ```
+
+### *. Later or missing info here:
+Authentication in fast api
+Architecture improvement

@@ -1,6 +1,7 @@
-from pydantic import BaseModel
-from sqlmodel import SQLModel, Field, Relationship
+from pydantic import BaseModel, EmailStr, field_validator
+from sqlmodel import SQLModel, Field, Relationship, Session, select
 from enum import Enum
+from db import engine
 
 class StatusEnum(str, Enum):
     ACTIVE = "active"
@@ -9,8 +10,35 @@ class StatusEnum(str, Enum):
 class CustomerBase(SQLModel):
     name: str = Field(default=None)
     description: str = Field(default=None)
-    email: str = Field(default=None)
+    email: EmailStr = Field(default=None, unique=True)
     age: int = Field(default=None)
+    
+    @field_validator("description")
+    @classmethod
+    def validateDescription(cls, value):
+        session = Session(engine)
+        query = select(Customer).where(Customer.description==value)
+        result = session.exec(query).first()
+        if result:
+            raise ValueError("Error, Description already exists")
+        return value
+    
+    @field_validator("email")
+    @classmethod
+    def validateEmail(cls, value):
+        session = Session(engine)
+        query = select(Customer).where(Customer.email==value)
+        result = session.exec(query).first()
+        if result:
+            raise ValueError("Error, Email already exists")
+        return value
+    
+    @field_validator("age")
+    @classmethod
+    def validateAge(cls, value):
+        if value<=0:
+            raise ValueError("Error, Age shouldn't be 0 or less")
+        return value
 
 class CustomerCreate(CustomerBase):
     pass
